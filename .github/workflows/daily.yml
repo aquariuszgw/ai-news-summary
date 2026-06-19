@@ -27,7 +27,7 @@ jobs:
       - name: 运行AI资讯摘要
         run: python summary.py
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       
       - name: 上传运行日志
         if: always()
