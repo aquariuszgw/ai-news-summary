@@ -1,20 +1,38 @@
-name: Daily AI News Summary
+name: 每日AI资讯摘要
 
 on:
+  # 定时触发：每天北京时间早上8:00（UTC 0:00）
   schedule:
-    # 每天早上8点运行（UTC时间，即北京时间下午4点）
     - cron: '0 0 * * *'
-  workflow_dispatch:  # 允许手动触发
+  # 允许手动触发，方便测试
+  workflow_dispatch:
 
 jobs:
-  summary:
+  generate-news:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: 拉取代码
+        uses: actions/checkout@v4
+      
+      - name: 设置Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - run: pip install feedparser openai requests
-      - run: python summary.py
+      
+      - name: 安装依赖  
+        run: |  
+          pip install feedparser openai requests
+      
+      - name: 运行AI资讯摘要
+        run: python summary.py
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      
+      - name: 上传运行日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-logs
+          path: |
+            *.log
