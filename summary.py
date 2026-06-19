@@ -88,6 +88,8 @@ def generate_summary(articles):
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",  # 使用稳定版本
+            # model="deepseek-v4-pro",  # 或 deepseek-chat（即将弃用）
+            # model="deepseek-chat",  # 使用稳定版本
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"今日AI资讯列表（共{len(articles)}条）：\n\n{news_text}"}
