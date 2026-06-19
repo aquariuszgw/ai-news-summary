@@ -11,7 +11,7 @@ APP_TOKEN = "AT_Ap3x5LvAFoh2CiFkTtvdPe0JumhXaoJm"      # 替换成你的AppToken
 TARGET_UID = "UID_YrzfdAKFDnUyaJAQQNmk5FIMzYq1"    # 替换成你的UID
 
 # DeepSeek API配置
-DEEPSEEK_API_KEY = os.environ.get("OPENAI_API_KEY")
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 
 # 调试：检查是否读取到了API Key（仅用于排查问题，运行正常后可删除）
 if not DEEPSEEK_API_KEY:
