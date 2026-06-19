@@ -13,13 +13,21 @@ TARGET_UID = "UID_YrzfdAKFDnUyaJAQQNmk5FIMzYq1"    # 替换成你的UID
 # DeepSeek API配置
 DEEPSEEK_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-# RSS源列表（可按需增删）
+# 调试：检查是否读取到了API Key（仅用于排查问题，运行正常后可删除）
+if not DEEPSEEK_API_KEY:
+    print("❌ 错误：未读取到 DEEPSEEK_API_KEY 环境变量")
+    print("请检查 GitHub Secrets 中是否设置了 DEEPSEEK_API_KEY")
+    exit(1)
+else:
+    print(f"✅ 已读取到 API Key，长度：{len(DEEPSEEK_API_KEY)} 字符")
+
+# RSS源列表
 RSS_FEEDS = [
-    "https://www.jiqizhixin.com/rss",      # 机器之心
-    "https://www.qbitai.com/feed",         # 量子位
-    "https://rss.arxiv.org/rss/cs.AI",     # arXiv AI论文
-    "https://rss.arxiv.org/rss/cs.LG",     # arXiv机器学习
-    "https://huggingface.co/blog/feed.xml",# Hugging Face
+    "https://www.jiqizhixin.com/rss",
+    "https://www.qbitai.com/feed",
+    "https://rss.arxiv.org/rss/cs.AI",
+    "https://rss.arxiv.org/rss/cs.LG",
+    "https://huggingface.co/blog/feed.xml",
 ]
 
 # ============ 抓取新闻 ============
@@ -52,7 +60,7 @@ def generate_summary(articles):
     if not articles:
         return "今日未抓取到AI相关资讯，请检查RSS源是否可用。"
     
-    # 构建待总结的文本（最多取20条）
+    # 构建待总结的文本
     news_text = ""
     for i, article in enumerate(articles[:20], 1):
         news_text += f"{i}. {article['title']}\n   {article['link']}\n"
@@ -71,14 +79,15 @@ def generate_summary(articles):
 
 今日重点关注：OpenAI GPT-4o的发布标志着多模态交互进入新阶段。"""
 
+    # 创建客户端时明确传入api_key
     client = OpenAI(
-        api_key=DEEPSEEK_API_KEY,
+        api_key=DEEPSEEK_API_KEY,  # 直接使用变量，不再从环境变量读取
         base_url="https://api.deepseek.com"
     )
     
     try:
         response = client.chat.completions.create(
-            model="deepseek-v4-pro",  # 或 deepseek-chat（即将弃用）
+            model="deepseek-chat",  # 使用稳定版本
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"今日AI资讯列表（共{len(articles)}条）：\n\n{news_text}"}
@@ -95,7 +104,6 @@ def send_to_wechat(summary, article_count):
     """使用WxPusher的Web API推送消息"""
     today = datetime.now().strftime("%Y年%m月%d日")
     
-    # 构建推送内容（支持Markdown格式）
     full_content = f"## 📰 AI每日资讯摘要 - {today}\n\n"
     full_content += f"📊 共抓取 {article_count} 条资讯\n\n"
     full_content += "---\n\n"
@@ -103,15 +111,13 @@ def send_to_wechat(summary, article_count):
     full_content += "\n\n---\n"
     full_content += "🤖 由 DeepSeek API + WxPusher 自动生成"
     
-    # WxPusher Web API 地址
     api_url = "http://wxpusher.zjiecode.com/api/send/message"
     
-    # 构建请求数据[citation:5]
     data = {
         "appToken": APP_TOKEN,
         "content": full_content,
-        "summary": f"AI日报 - {today}",  # 微信通知栏显示的摘要
-        "contentType": 2,               # 1=文本，2=HTML/Markdown
+        "summary": f"AI日报 - {today}",
+        "contentType": 2,
         "uids": [TARGET_UID],
     }
     
